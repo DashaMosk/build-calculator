@@ -25,9 +25,11 @@ public class Decoration {
         return id;
     }
 
-    public Decoration(String type, int height, int width) {
-        this.type = type;
-        this.height = height;
-        this.width = width;
+    public Wall getWall() {
+        return wall;
+    }
+
+    public double getMeasurement() {
+        return (double)(height*width)/100;
     }
 }

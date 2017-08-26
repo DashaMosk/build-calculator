@@ -17,6 +17,7 @@ public class Wall {
     private int height;
     private int width;
     private String name;
+    private boolean ForFloorCalculation;
     @ManyToOne
     @JoinColumn(name = "roomId")
     private Room room;
@@ -25,8 +26,19 @@ public class Wall {
         return id;
     }
 
-    public Wall(int height, int width) {
-        this.height = height;
-        this.width = width;
+    public Room getRoom() {
+        return room;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public boolean isForFloorCalculation() {
+        return ForFloorCalculation;
+    }
+
+    public double getMeasurement() {
+        return (double)(height*width)/100;
     }
 }
