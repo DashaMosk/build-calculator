@@ -13,4 +13,7 @@ public interface ApertureRepository  extends CrudRepository<Aperture, Long> {
 
     @Query("select a from Aperture a where a.wall.id = :id")
     List<Aperture> findByWallId(@Param("id") Long id);
+
+    @Query("select a.type from Aperture a where a.id = :id")
+    String getNameById(@Param("id") Long id);
 }

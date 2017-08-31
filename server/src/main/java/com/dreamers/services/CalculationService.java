@@ -1,13 +1,15 @@
 package com.dreamers.services;
 
-import com.dreamers.entities.Measurement;
+import com.dreamers.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class CalculationService {
 
     @Autowired
@@ -20,14 +22,22 @@ public class CalculationService {
     private DecorationService decorationService;
     @Autowired
     private MeasurementService measurementService;
+    @Autowired
+    private FacilityEquipmentService facilityEquipmentService;
+    @Autowired
+    private CalculationResultService resultService;
 
     private static final int WALL_NUMBER_FOR_FLOOR_CALC = 4;
 
-    public void getCalculation() {}
+    public void doCalculation(Long facilityId) {
+        fillMeasurement(facilityId);
+    }
 
-    void recalculate() {}
+    void recalculate() {
+    }
 
-    void clearCalculation(Long facilityId) {}
+    void clearCalculation(Long facilityId) {
+    }
 
     void fillMeasurement(Long facilityId) {
         Map<Long, List<Integer>> wallsWidth = new HashMap<>();
@@ -35,8 +45,8 @@ public class CalculationService {
                 .forEach(room -> {
                     wallService.getWallsForRoom(room.getId())
                             .forEach(wall -> {
-                                if(wall.isForFloorCalculation()) {
-                                    if(wallsWidth.containsKey(wall.getRoom().getId())) {
+                                if (wall.isForFloorCalculation()) {
+                                    if (wallsWidth.containsKey(wall.getRoom().getId())) {
                                         wallsWidth.get(wall.getRoom().getId()).add(wall.getWidth());
                                     } else {
                                         wallsWidth.put(wall.getRoom().getId(), Arrays.asList(wall.getWidth()));
@@ -73,9 +83,9 @@ public class CalculationService {
                             });
                 });
 
-        wallsWidth.forEach( (roomId, widthList) -> {
+        wallsWidth.forEach((roomId, widthList) -> {
                     double square = calculateSquare(widthList);
-                    if(widthList.size() == WALL_NUMBER_FOR_FLOOR_CALC) {
+                    if (widthList.size() == WALL_NUMBER_FOR_FLOOR_CALC) {
                         measurementService.save(new Measurement
                                 .Builder(facilityId, roomId)
                                 .floorM2(square)
@@ -106,5 +116,37 @@ public class CalculationService {
 
     void fillCalculation(long facilityId) {
 
+        List<Measurement> measurements = measurementService.getAllByFacilityId(facilityId);
+
+        measurements.stream()
+                .filter(measurement -> measurement.getApertureId() != null)
+                .forEach(measurement -> {
+                    resultService.save(new CalculationResult
+                            .Builder(measurement, measurement.getWallsM2(), false)
+                            .stuffName(apertureService.getNameById(measurement.getApertureId()))
+                            .build());
+                });
+
+        measurements.stream()
+                .filter(measurement -> measurement.getDecorationId() != null)
+                .forEach(mst -> {
+                    facilityEquipmentService.findByTypeAndFacilityID(FacilityType.DECORATION, mst.getDecorationId())
+                            .forEach(equipment -> {
+                                resultService.save(new CalculationResult
+                                        .Builder(mst, mst.getWallsM2(), equipment.getStuff().isClean())
+                                        .stuffName(equipment.getStuff().getName())
+                                        .consumption(equipment.getStuff().getConsumption() * mst.getWallsM2())
+                                        .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                        .packConsumption(getPackConsumption(equipment, mst.getWallsM2()))
+                                        .packName(equipment.getStuff().getPacking().getName())
+                                        .build());
+                            });
+                });
+
     }
+
+    private  double getPackConsumption(FacilityEquipment equipment, double m2) {
+        return equipment.getStuff().getConsumption() * m2/equipment.getStuff().getPacking().getQuantity();
+    }
+
 }

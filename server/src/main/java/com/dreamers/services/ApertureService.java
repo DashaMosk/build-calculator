@@ -24,4 +24,8 @@ public class ApertureService {
         return apertureRepository.findByWallId(id);
     }
 
+    public String getNameById(Long id) {
+        return apertureRepository.getNameById(id);
+    }
+
 }

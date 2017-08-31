@@ -21,4 +21,20 @@ public class Packing {
     private double quantity;
     private MeasureType unit;
     private double consumption;
+
+    public String getName() {
+        return name;
+    }
+
+    public double getQuantity() {
+        return quantity;
+    }
+
+    public MeasureType getUnit() {
+        return unit;
+    }
+
+    public double getConsumption() {
+        return consumption;
+    }
 }

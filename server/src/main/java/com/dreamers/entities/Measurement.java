@@ -8,20 +8,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-@ToString
+@Data
 @EqualsAndHashCode(exclude={"id"})
 public class Measurement {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
-    private final Long facilityId;
-    private final Long roomId;
-    private final Long wallId;
-    private final Long apertureId;
-    private final Long decorationId;
-    private final double wallsM2;
-    private final double ceilingM2;
-    private final double floorM2;
+    private Long facilityId;
+    private Long roomId;
+    private Long wallId;
+    private Long apertureId;
+    private Long decorationId;
+    private double wallsM2;
+    private double ceilingM2;
+    private double floorM2;
 
     public static class Builder {
         // Required parameters
@@ -56,6 +56,20 @@ public class Measurement {
         public Measurement build() {
             return new Measurement(this);
         }
+    }
+
+    private Measurement() {};
+
+    public Long getApertureId() {
+        return apertureId;
+    }
+
+    public Long getDecorationId() {
+        return decorationId;
+    }
+
+    public double getWallsM2() {
+        return wallsM2;
     }
 
     private Measurement(Builder builder) {

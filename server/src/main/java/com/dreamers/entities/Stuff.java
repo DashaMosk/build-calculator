@@ -23,4 +23,24 @@ public class Stuff {
     @JsonProperty
     private boolean isClean;
     private double price;
+
+    public boolean isClean() {
+        return isClean;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Packing getPacking() {
+        return packing;
+    }
+
+    public double getConsumption() {
+        return consumption;
+    }
+
+    public double getPrice() {
+        return price;
+    }
 }

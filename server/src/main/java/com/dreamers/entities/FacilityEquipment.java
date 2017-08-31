@@ -22,4 +22,12 @@ public class FacilityEquipment {
     private Long facilityID;
     @JsonProperty
     private FacilityType fType;
+
+    public FacilityType getfType() {
+        return fType;
+    }
+
+    public Stuff getStuff() {
+        return stuff;
+    }
 }
