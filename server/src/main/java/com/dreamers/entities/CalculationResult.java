@@ -62,6 +62,18 @@ public class CalculationResult {
         }
     }
 
+    public double getM2() {
+        return m2;
+    }
+
+    public boolean isClean() {
+        return isClean;
+    }
+
+    public Measurement getMeasurement() {
+        return measurement;
+    }
+
     private CalculationResult(Builder builder) {
         this.m2 = builder.m2;
         this.isClean = builder.isClean;

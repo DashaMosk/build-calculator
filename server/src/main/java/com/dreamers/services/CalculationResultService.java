@@ -5,6 +5,8 @@ import com.dreamers.repositories.CalculationResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CalculationResultService {
 
@@ -17,6 +19,10 @@ public class CalculationResultService {
 
     public void delete(Long id) {
         calculationResultRepository.delete(id);
+    }
+
+    public List<CalculationResult> findByWallId(Long wallId) {
+        return calculationResultRepository.findByWallId(wallId);
     }
 
 }

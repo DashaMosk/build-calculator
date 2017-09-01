@@ -68,6 +68,10 @@ public class Measurement {
         return decorationId;
     }
 
+    public Long getWallId() {
+        return wallId;
+    }
+
     public double getWallsM2() {
         return wallsM2;
     }

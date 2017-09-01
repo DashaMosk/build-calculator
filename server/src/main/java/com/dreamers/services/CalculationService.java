@@ -4,10 +4,7 @@ import com.dreamers.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class CalculationService {
@@ -39,7 +36,7 @@ public class CalculationService {
     void clearCalculation(Long facilityId) {
     }
 
-    void fillMeasurement(Long facilityId) {
+    private void fillMeasurement(Long facilityId) {
         Map<Long, List<Integer>> wallsWidth = new HashMap<>();
         roomService.getAllByFacilityId(facilityId)
                 .forEach(room -> {
@@ -49,7 +46,7 @@ public class CalculationService {
                                     if (wallsWidth.containsKey(wall.getRoom().getId())) {
                                         wallsWidth.get(wall.getRoom().getId()).add(wall.getWidth());
                                     } else {
-                                        wallsWidth.put(wall.getRoom().getId(), Arrays.asList(wall.getWidth()));
+                                        wallsWidth.put(wall.getRoom().getId(), Collections.singletonList(wall.getWidth()));
                                     }
                                 }
 
@@ -143,10 +140,64 @@ public class CalculationService {
                             });
                 });
 
+        measurements.stream()
+                .filter(measurement -> measurement.getWallId() != null)
+                .forEach(mst -> {
+                    if(mst.getDecorationId() == null && mst.getApertureId() == null) {
+                        double[] m2 = calculateM2(mst);
+                        facilityEquipmentService.findByTypeAndFacilityID(FacilityType.WALL, mst.getWallId())
+                                .forEach(equipment -> {
+                                    double m2Calc = equipment.getStuff().isClean() ? m2[0] : m2[1];
+                                    resultService.save(new CalculationResult
+                                            .Builder(mst, m2Calc, equipment.getStuff().isClean())
+                                            .stuffName(equipment.getStuff().getName())
+                                            .consumption(equipment.getStuff().getConsumption() * m2Calc)
+                                            .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                            .packConsumption(getPackConsumption(equipment, m2Calc))
+                                            .packName(equipment.getStuff().getPacking().getName())
+                                            .build());
+                                });
+                    }
+                });
+
     }
 
     private  double getPackConsumption(FacilityEquipment equipment, double m2) {
         return equipment.getStuff().getConsumption() * m2/equipment.getStuff().getPacking().getQuantity();
+    }
+
+    //returns arr[0] - for clean, arr[1] - for rough
+    private double[] calculateM2(Measurement mst) {
+        Set<Measurement> apreturesSet = new HashSet<>();
+        Set<Measurement> cleanDecSet = new HashSet<>();
+        Set<Measurement> roughDecSet = new HashSet<>();
+        resultService.findByWallId(mst.getWallId())
+                .forEach(result -> {
+                    if(result.getMeasurement().getApertureId() != null) {
+                        apreturesSet.add(result.getMeasurement());
+                    }
+                    if(result.getMeasurement().getDecorationId() != null) {
+                        if(result.isClean()) {
+                            cleanDecSet.add(result.getMeasurement());
+                        } else {
+                            roughDecSet.add(result.getMeasurement());
+                        }
+                    }
+                });
+        double[] calcResult = new double[2];
+        double aprM2 = calcSum(apreturesSet);
+        calcResult[0] = mst.getWallsM2() -  aprM2 - calcSum(cleanDecSet);
+        calcResult[1] = mst.getWallsM2() -  aprM2 - calcSum(roughDecSet);
+        return calcResult;
+    }
+
+
+    private double calcSum(Set<Measurement> set) {
+        double sum = 0.0;
+        for (Measurement m : set) {
+            sum += m.getWallsM2();
+        }
+        return sum;
     }
 
 }
