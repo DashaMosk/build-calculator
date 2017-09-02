@@ -28,9 +28,7 @@ public class CalculationService {
 
     public void doCalculation(Long facilityId) {
         fillMeasurement(facilityId);
-    }
-
-    void recalculate() {
+        fillCalculation(facilityId);
     }
 
     void clearCalculation(Long facilityId) {
@@ -58,7 +56,6 @@ public class CalculationService {
                                                     .apertureId(aperture.getId())
                                                     .wallsM2(aperture.getMeasurement())
                                                     .build());
-
                                         });
 
                                 decorationService.getDecorationsForWall(wall.getId())
@@ -69,7 +66,6 @@ public class CalculationService {
                                                     .decorationId(decoration.getId())
                                                     .wallsM2(decoration.getMeasurement())
                                                     .build());
-
                                         });
 
                                 measurementService.save(new Measurement
@@ -111,10 +107,11 @@ public class CalculationService {
         return Math.sqrt(product)/100;
     }
 
-    void fillCalculation(long facilityId) {
+    private void fillCalculation(long facilityId) {
 
         List<Measurement> measurements = measurementService.getAllByFacilityId(facilityId);
 
+        // fill info for apertures
         measurements.stream()
                 .filter(measurement -> measurement.getApertureId() != null)
                 .forEach(measurement -> {
@@ -124,6 +121,7 @@ public class CalculationService {
                             .build());
                 });
 
+        // fill info for decorations
         measurements.stream()
                 .filter(measurement -> measurement.getDecorationId() != null)
                 .forEach(mst -> {
@@ -140,26 +138,137 @@ public class CalculationService {
                             });
                 });
 
+        // fill info for walls
         measurements.stream()
                 .filter(measurement -> measurement.getWallId() != null)
                 .forEach(mst -> {
                     if(mst.getDecorationId() == null && mst.getApertureId() == null) {
                         double[] m2 = calculateM2(mst);
-                        facilityEquipmentService.findByTypeAndFacilityID(FacilityType.WALL, mst.getWallId())
-                                .forEach(equipment -> {
-                                    double m2Calc = equipment.getStuff().isClean() ? m2[0] : m2[1];
+                        List<FacilityEquipment> cleanEquipments = facilityEquipmentService
+                                .findByTypeFacilityIDClean(FacilityType.WALL, mst.getWallId(), true);
+                        if(cleanEquipments.size() == 0) {
+                            cleanEquipments = facilityEquipmentService
+                                    .findByTypeFacilityIDClean(FacilityType.ROOM, mst.getRoomId(), true);
+                        }
+                        if(cleanEquipments.size() == 0) {
+                            cleanEquipments = facilityEquipmentService
+                                    .findByTypeFacilityIDClean(FacilityType.FACILITY, mst.getFacilityId(), true);
+                        }
+                        cleanEquipments.forEach(equipment -> {
                                     resultService.save(new CalculationResult
-                                            .Builder(mst, m2Calc, equipment.getStuff().isClean())
+                                            .Builder(mst, m2[0], true)
                                             .stuffName(equipment.getStuff().getName())
-                                            .consumption(equipment.getStuff().getConsumption() * m2Calc)
+                                            .consumption(equipment.getStuff().getConsumption() * m2[0])
                                             .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                            .packConsumption(getPackConsumption(equipment, m2Calc))
+                                            .packConsumption(getPackConsumption(equipment, m2[0]))
                                             .packName(equipment.getStuff().getPacking().getName())
                                             .build());
                                 });
+
+                        List<FacilityEquipment> roughEquipments = facilityEquipmentService
+                                .findByTypeFacilityIDClean(FacilityType.WALL, mst.getWallId(), false);
+                        if(roughEquipments.size() == 0) {
+                            roughEquipments = facilityEquipmentService
+                                    .findByTypeFacilityIDClean(FacilityType.ROOM, mst.getRoomId(), false);
+
+                        }
+                        if(roughEquipments.size() == 0) {
+                            roughEquipments = facilityEquipmentService
+                                    .findByTypeFacilityIDClean(FacilityType.FACILITY, mst.getFacilityId(), false);
+
+                        }
+                        roughEquipments.forEach(equipment -> {
+                            resultService.save(new CalculationResult
+                                    .Builder(mst, m2[1], false)
+                                    .stuffName(equipment.getStuff().getName())
+                                    .consumption(equipment.getStuff().getConsumption() * m2[1])
+                                    .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                    .packConsumption(getPackConsumption(equipment, m2[1]))
+                                    .packName(equipment.getStuff().getPacking().getName())
+                                    .build());
+                        });
+
+
                     }
                 });
 
+        // fill info for ceiling
+        measurements.stream()
+                .filter(mst -> mst.getCeilingM2() > 0.0)
+                .forEach(mst -> {
+                    List<FacilityEquipment> cleanEquipments = facilityEquipmentService
+                            .findByTypeFacilityIdPartTypeAndClean(FacilityType.ROOM, mst.getRoomId(), true, PartType.CEILING);
+                    if(cleanEquipments.size() == 0) {
+                        cleanEquipments = facilityEquipmentService.findByTypeFacilityIdPartTypeAndClean(FacilityType.FACILITY
+                        , mst.getFacilityId(), true, PartType.CEILING);
+                    }
+                    cleanEquipments.forEach(equipment -> {
+                        resultService.save(new CalculationResult
+                                .Builder(mst, mst.getCeilingM2(), true)
+                                .stuffName(equipment.getStuff().getName())
+                                .consumption(equipment.getStuff().getConsumption() * mst.getCeilingM2())
+                                .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                .packConsumption(getPackConsumption(equipment, mst.getCeilingM2()))
+                                .packName(equipment.getStuff().getPacking().getName())
+                                .build());
+                    });
+
+                    List<FacilityEquipment> roughEquipments = facilityEquipmentService
+                            .findByTypeFacilityIdPartTypeAndClean(FacilityType.ROOM, mst.getRoomId(), false, PartType.CEILING);
+                    if(roughEquipments.size() == 0) {
+                        roughEquipments = facilityEquipmentService.findByTypeFacilityIdPartTypeAndClean(FacilityType.FACILITY
+                                , mst.getFacilityId(), false, PartType.CEILING);
+                    }
+                    roughEquipments.forEach(equipment -> {
+                        resultService.save(new CalculationResult
+                                .Builder(mst, mst.getCeilingM2(), false)
+                                .stuffName(equipment.getStuff().getName())
+                                .consumption(equipment.getStuff().getConsumption() * mst.getCeilingM2())
+                                .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                .packConsumption(getPackConsumption(equipment, mst.getCeilingM2()))
+                                .packName(equipment.getStuff().getPacking().getName())
+                                .build());
+                    });
+                });
+
+        // fill info for floor
+        measurements.stream()
+                .filter(mst -> mst.getFloorM2() > 0.0)
+                .forEach(mst -> {
+                    List<FacilityEquipment> cleanEquipments = facilityEquipmentService
+                            .findByTypeFacilityIdPartTypeAndClean(FacilityType.ROOM, mst.getRoomId(), true, PartType.FLOOR);
+                    if(cleanEquipments.size() == 0) {
+                        cleanEquipments = facilityEquipmentService.findByTypeFacilityIdPartTypeAndClean(FacilityType.FACILITY
+                                , mst.getFacilityId(), true, PartType.FLOOR);
+                    }
+                    cleanEquipments.forEach(equipment -> {
+                        resultService.save(new CalculationResult
+                                .Builder(mst, mst.getFloorM2(), true)
+                                .stuffName(equipment.getStuff().getName())
+                                .consumption(equipment.getStuff().getConsumption() * mst.getFloorM2())
+                                .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                .packConsumption(getPackConsumption(equipment, mst.getFloorM2()))
+                                .packName(equipment.getStuff().getPacking().getName())
+                                .build());
+                    });
+
+                    List<FacilityEquipment> roughEquipments = facilityEquipmentService
+                            .findByTypeFacilityIdPartTypeAndClean(FacilityType.ROOM, mst.getRoomId(), false, PartType.FLOOR);
+                    if(roughEquipments.size() == 0) {
+                        roughEquipments = facilityEquipmentService.findByTypeFacilityIdPartTypeAndClean(FacilityType.FACILITY
+                                , mst.getFacilityId(), false, PartType.FLOOR);
+                    }
+                    roughEquipments.forEach(equipment -> {
+                        resultService.save(new CalculationResult
+                                .Builder(mst, mst.getFloorM2(), false)
+                                .stuffName(equipment.getStuff().getName())
+                                .consumption(equipment.getStuff().getConsumption() * mst.getFloorM2())
+                                .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
+                                .packConsumption(getPackConsumption(equipment, mst.getFloorM2()))
+                                .packName(equipment.getStuff().getPacking().getName())
+                                .build());
+                    });
+                });
     }
 
     private  double getPackConsumption(FacilityEquipment equipment, double m2) {
@@ -168,13 +277,13 @@ public class CalculationService {
 
     //returns arr[0] - for clean, arr[1] - for rough
     private double[] calculateM2(Measurement mst) {
-        Set<Measurement> apreturesSet = new HashSet<>();
+        Set<Measurement> apertureSet = new HashSet<>();
         Set<Measurement> cleanDecSet = new HashSet<>();
         Set<Measurement> roughDecSet = new HashSet<>();
         resultService.findByWallId(mst.getWallId())
                 .forEach(result -> {
                     if(result.getMeasurement().getApertureId() != null) {
-                        apreturesSet.add(result.getMeasurement());
+                        apertureSet.add(result.getMeasurement());
                     }
                     if(result.getMeasurement().getDecorationId() != null) {
                         if(result.isClean()) {
@@ -185,7 +294,7 @@ public class CalculationService {
                     }
                 });
         double[] calcResult = new double[2];
-        double aprM2 = calcSum(apreturesSet);
+        double aprM2 = calcSum(apertureSet);
         calcResult[0] = mst.getWallsM2() -  aprM2 - calcSum(cleanDecSet);
         calcResult[1] = mst.getWallsM2() -  aprM2 - calcSum(roughDecSet);
         return calcResult;
@@ -199,5 +308,4 @@ public class CalculationService {
         }
         return sum;
     }
-
 }

@@ -72,8 +72,24 @@ public class Measurement {
         return wallId;
     }
 
+    public Long getFacilityId() {
+        return facilityId;
+    }
+
+    public Long getRoomId() {
+        return roomId;
+    }
+
     public double getWallsM2() {
         return wallsM2;
+    }
+
+    public double getCeilingM2() {
+        return ceilingM2;
+    }
+
+    public double getFloorM2() {
+        return floorM2;
     }
 
     private Measurement(Builder builder) {

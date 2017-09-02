@@ -1,8 +1,8 @@
 package com.dreamers.controllers;
 
-import com.dreamers.entities.Measurement;
+import com.dreamers.entities.CalculationResult;
+import com.dreamers.services.CalculationResultService;
 import com.dreamers.services.CalculationService;
-import com.dreamers.services.MeasurementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,15 +16,13 @@ public class CalculationController {
     @Autowired
     private CalculationService calculationService;
     @Autowired
-    private MeasurementService measurementService;
+    private CalculationResultService resultService;
 
     @GetMapping("/api/calculation")
-    public List<Measurement> getCalculation(@RequestParam Long facilityId, @RequestParam boolean recalculate ) {
+    public List<CalculationResult> getCalculation(@RequestParam Long facilityId, @RequestParam boolean recalculate ) {
         if(recalculate) {
             calculationService.doCalculation(facilityId);
         }
-        return measurementService.getAllMeasurement();
+        return resultService.findByWallId(facilityId);
     }
-
-
 }
