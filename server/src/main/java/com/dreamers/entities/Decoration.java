@@ -30,6 +30,6 @@ public class Decoration {
     }
 
     public double getMeasurement() {
-        return (double)(height*width)/100;
+        return (double)(height*width)/10000;
     }
 }

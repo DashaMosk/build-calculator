@@ -13,22 +13,26 @@ public class CalculationResult {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private final double m2;
+    private double m2;
     @JsonProperty
-    private final boolean isClean;
-    private final String stuffName;
-    private final double consumption;
-    private final String measureName;
-    private final double packConsumption;
-    private final String packName;
+    private boolean isClean;
+    private Long stuffId;
+    private String stuffName;
+    private double consumption;
+    private String measureName;
+    private double packConsumption;
+    private String packName;
 
     @ManyToOne
     @JoinColumn(name = "measurementId")
-    private final Measurement measurement;
+    private Measurement measurement;
+
+    public CalculationResult(){};
 
     public static class Builder {
         private double m2;
         private boolean isClean;
+        private Long stuffId;
         private String stuffName;
         private double consumption;
         private String measureName;
@@ -41,6 +45,11 @@ public class CalculationResult {
             this.m2 = m2;
             this.isClean = isClean;
         }
+
+        public Builder stuffId(Long stuffId) {
+            this.stuffId = stuffId; return this;
+        }
+
         public Builder stuffName(String stuffName) {
             this.stuffName = stuffName; return this;
         }
@@ -62,12 +71,40 @@ public class CalculationResult {
         }
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public double getM2() {
         return m2;
     }
 
     public boolean isClean() {
         return isClean;
+    }
+
+    public Long getStuffId() {
+        return stuffId;
+    }
+
+    public String getStuffName() {
+        return stuffName;
+    }
+
+    public double getConsumption() {
+        return consumption;
+    }
+
+    public String getMeasureName() {
+        return measureName;
+    }
+
+    public double getPackConsumption() {
+        return packConsumption;
+    }
+
+    public String getPackName() {
+        return packName;
     }
 
     public Measurement getMeasurement() {
@@ -77,6 +114,7 @@ public class CalculationResult {
     private CalculationResult(Builder builder) {
         this.m2 = builder.m2;
         this.isClean = builder.isClean;
+        this.stuffId = builder.stuffId;
         this.stuffName = builder.stuffName;
         this.consumption = builder.consumption;
         this.measureName = builder.measureName;

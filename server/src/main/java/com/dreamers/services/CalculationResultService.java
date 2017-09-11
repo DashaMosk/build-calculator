@@ -25,4 +25,8 @@ public class CalculationResultService {
         return calculationResultRepository.findByWallId(wallId);
     }
 
+    public List<CalculationResult> findByFacilityId(Long fId) {
+        return calculationResultRepository.findByFacilityId(fId);
+    }
+
 }

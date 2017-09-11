@@ -60,6 +60,10 @@ public class Measurement {
 
     private Measurement() {};
 
+    public Long getId() {
+        return id;
+    }
+
     public Long getApertureId() {
         return apertureId;
     }

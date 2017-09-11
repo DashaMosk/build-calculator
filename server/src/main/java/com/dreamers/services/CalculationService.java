@@ -27,11 +27,20 @@ public class CalculationService {
     private static final int WALL_NUMBER_FOR_FLOOR_CALC = 4;
 
     public void doCalculation(Long facilityId) {
+        clearCalculation(facilityId);
         fillMeasurement(facilityId);
         fillCalculation(facilityId);
     }
 
-    void clearCalculation(Long facilityId) {
+    private void clearCalculation(Long facilityId) {
+        resultService.findByFacilityId(facilityId).forEach(result -> {
+            resultService.delete(result.getId());
+        });
+
+        measurementService.getAllByFacilityId(facilityId).forEach(measurement -> {
+            measurementService.delete(measurement.getId());
+        });
+
     }
 
     private void fillMeasurement(Long facilityId) {
@@ -129,10 +138,11 @@ public class CalculationService {
                             .forEach(equipment -> {
                                 resultService.save(new CalculationResult
                                         .Builder(mst, mst.getWallsM2(), equipment.getStuff().isClean())
+                                        .stuffId(equipment.getStuff().getId())
                                         .stuffName(equipment.getStuff().getName())
-                                        .consumption(equipment.getStuff().getConsumption() * mst.getWallsM2())
+                                        .consumption(equipment.getStuff().getConsumption())
                                         .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                        .packConsumption(getPackConsumption(equipment, mst.getWallsM2()))
+                                        .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                         .packName(equipment.getStuff().getPacking().getName())
                                         .build());
                             });
@@ -157,10 +167,11 @@ public class CalculationService {
                         cleanEquipments.forEach(equipment -> {
                                     resultService.save(new CalculationResult
                                             .Builder(mst, m2[0], true)
+                                            .stuffId(equipment.getStuff().getId())
                                             .stuffName(equipment.getStuff().getName())
-                                            .consumption(equipment.getStuff().getConsumption() * m2[0])
+                                            .consumption(equipment.getStuff().getConsumption())
                                             .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                            .packConsumption(getPackConsumption(equipment, m2[0]))
+                                            .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                             .packName(equipment.getStuff().getPacking().getName())
                                             .build());
                                 });
@@ -180,10 +191,11 @@ public class CalculationService {
                         roughEquipments.forEach(equipment -> {
                             resultService.save(new CalculationResult
                                     .Builder(mst, m2[1], false)
+                                    .stuffId(equipment.getStuff().getId())
                                     .stuffName(equipment.getStuff().getName())
-                                    .consumption(equipment.getStuff().getConsumption() * m2[1])
+                                    .consumption(equipment.getStuff().getConsumption())
                                     .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                    .packConsumption(getPackConsumption(equipment, m2[1]))
+                                    .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                     .packName(equipment.getStuff().getPacking().getName())
                                     .build());
                         });
@@ -205,10 +217,11 @@ public class CalculationService {
                     cleanEquipments.forEach(equipment -> {
                         resultService.save(new CalculationResult
                                 .Builder(mst, mst.getCeilingM2(), true)
+                                .stuffId(equipment.getStuff().getId())
                                 .stuffName(equipment.getStuff().getName())
-                                .consumption(equipment.getStuff().getConsumption() * mst.getCeilingM2())
+                                .consumption(equipment.getStuff().getConsumption())
                                 .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                .packConsumption(getPackConsumption(equipment, mst.getCeilingM2()))
+                                .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                 .packName(equipment.getStuff().getPacking().getName())
                                 .build());
                     });
@@ -222,10 +235,11 @@ public class CalculationService {
                     roughEquipments.forEach(equipment -> {
                         resultService.save(new CalculationResult
                                 .Builder(mst, mst.getCeilingM2(), false)
+                                .stuffId(equipment.getStuff().getId())
                                 .stuffName(equipment.getStuff().getName())
-                                .consumption(equipment.getStuff().getConsumption() * mst.getCeilingM2())
+                                .consumption(equipment.getStuff().getConsumption())
                                 .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                .packConsumption(getPackConsumption(equipment, mst.getCeilingM2()))
+                                .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                 .packName(equipment.getStuff().getPacking().getName())
                                 .build());
                     });
@@ -244,10 +258,11 @@ public class CalculationService {
                     cleanEquipments.forEach(equipment -> {
                         resultService.save(new CalculationResult
                                 .Builder(mst, mst.getFloorM2(), true)
+                                .stuffId(equipment.getStuff().getId())
                                 .stuffName(equipment.getStuff().getName())
-                                .consumption(equipment.getStuff().getConsumption() * mst.getFloorM2())
+                                .consumption(equipment.getStuff().getConsumption())
                                 .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                .packConsumption(getPackConsumption(equipment, mst.getFloorM2()))
+                                .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                 .packName(equipment.getStuff().getPacking().getName())
                                 .build());
                     });
@@ -261,10 +276,11 @@ public class CalculationService {
                     roughEquipments.forEach(equipment -> {
                         resultService.save(new CalculationResult
                                 .Builder(mst, mst.getFloorM2(), false)
+                                .stuffId(equipment.getStuff().getId())
                                 .stuffName(equipment.getStuff().getName())
-                                .consumption(equipment.getStuff().getConsumption() * mst.getFloorM2())
+                                .consumption(equipment.getStuff().getConsumption())
                                 .measureName(equipment.getStuff().getPacking().getUnit().getShortName())
-                                .packConsumption(getPackConsumption(equipment, mst.getFloorM2()))
+                                .packConsumption(equipment.getStuff().getPacking().getQuantity())
                                 .packName(equipment.getStuff().getPacking().getName())
                                 .build());
                     });

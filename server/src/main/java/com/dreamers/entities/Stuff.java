@@ -24,6 +24,10 @@ public class Stuff {
     private boolean isClean;
     private double price;
 
+    public Long getId() {
+        return id;
+    }
+
     public boolean isClean() {
         return isClean;
     }
