@@ -22,10 +22,12 @@ public class CalculationController {
     private CalculationAdapter calculationAdapter;
 
     @GetMapping("/api/calculation")
-    public List<Result> getCalculation(@RequestParam Long facilityId, @RequestParam boolean recalculate ) {
-        if(recalculate) {
-            calculationService.doCalculation(facilityId);
-        }
+    public void getCalculation(@RequestParam Long facilityId ) {
+        calculationService.doCalculation(facilityId);
+    }
+
+    @GetMapping("/api/roomCalc")
+    public List<Result> getCalculationForRooms(@RequestParam Long facilityId) {
         return calculationAdapter.getResultFromCalculation(resultService.findByFacilityId(facilityId));
     }
 
