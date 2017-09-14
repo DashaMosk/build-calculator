@@ -27,4 +27,8 @@ public class WallController {
         wallService.delete(id);
     }
 
+    @GetMapping("/api/wall")
+    public Wall getWall(@RequestParam Long id) {
+        return wallService.getWall(id);
+    }
 }

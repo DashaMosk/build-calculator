@@ -23,6 +23,10 @@ public class WallService {
         return wallRepository.save(wall);
     }
 
+    public Wall getWall(Long id) {
+        return wallRepository.findOne(id);
+    }
+
     public void delete(Long id) {
         decorationService.getDecorationsForWall(id)
                 .forEach(decoration -> decorationService.delete(decoration.getId()));

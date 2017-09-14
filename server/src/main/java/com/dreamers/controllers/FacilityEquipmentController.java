@@ -1,6 +1,7 @@
 package com.dreamers.controllers;
 
 import com.dreamers.entities.FacilityEquipment;
+import com.dreamers.entities.FacilityType;
 import com.dreamers.repositories.FacilityEquipmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class FacilityEquipmentController {
     }
 
     @GetMapping("/api/equipmentList")
-    public List<FacilityEquipment> findByFacilityId(@RequestParam Long id) {
-        return equipmentRepository.findByFacilityID(id);
+    public List<FacilityEquipment> findByTypeAndFacilityId(@RequestParam Long id, @RequestParam FacilityType type) {
+        return equipmentRepository.findByTypeAndFacilityID(type, id);
     }
 }
