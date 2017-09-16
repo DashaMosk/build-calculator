@@ -19,7 +19,7 @@ public class WallController {
 
     @PostMapping("/api/wall")
     public Wall saveWall(@RequestBody Wall wall) {
-        return wallService.save(wall);
+       return wallService.save(wall);
     }
 
     @DeleteMapping("/api/wall")

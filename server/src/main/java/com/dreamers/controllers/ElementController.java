@@ -27,6 +27,11 @@ public class ElementController {
         return decorationService.save(decoration);
     }
 
+    @GetMapping("/api/decoration")
+    public Decoration getDecoration(@RequestParam Long id) {
+        return decorationService.getDecorationById(id);
+    }
+
     @DeleteMapping("/api/decoration")
     public void deleteDecoration(@RequestParam Long id) {
         decorationService.delete(id);

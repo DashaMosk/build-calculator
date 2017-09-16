@@ -23,4 +23,8 @@ public class DecorationService {
     public List<Decoration> getDecorationsForWall(Long id) {
         return decorationRepository.findByWallId(id);
     }
+
+    public Decoration getDecorationById(Long id) {
+        return decorationRepository.findOne(id);
+    }
 }

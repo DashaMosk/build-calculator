@@ -1,5 +1,6 @@
 package com.dreamers.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class Wall {
     private int height;
     private int width;
     private String name;
-    private boolean ForFloorCalculation;
+    private boolean forFloorCalculation;
     @ManyToOne
     @JoinColumn(name = "roomId")
     private Room room;
@@ -35,7 +36,7 @@ public class Wall {
     }
 
     public boolean isForFloorCalculation() {
-        return ForFloorCalculation;
+        return forFloorCalculation;
     }
 
     public double getMeasurement() {

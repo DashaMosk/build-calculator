@@ -53,7 +53,7 @@ public class CalculationService {
                                     if (wallsWidth.containsKey(wall.getRoom().getId())) {
                                         wallsWidth.get(wall.getRoom().getId()).add(wall.getWidth());
                                     } else {
-                                        wallsWidth.put(wall.getRoom().getId(), Collections.singletonList(wall.getWidth()));
+                                        wallsWidth.put(wall.getRoom().getId(), new ArrayList<Integer>(Arrays.asList(wall.getWidth())));
                                     }
                                 }
 
@@ -113,7 +113,7 @@ public class CalculationService {
             product = (sperimeter - i) * product;
         }
 
-        return Math.sqrt(product)/100;
+        return Math.sqrt(product/10000)/100;
     }
 
     private void fillCalculation(long facilityId) {
@@ -155,14 +155,14 @@ public class CalculationService {
                     if(mst.getDecorationId() == null && mst.getApertureId() == null) {
                         double[] m2 = calculateM2(mst);
                         List<FacilityEquipment> cleanEquipments = facilityEquipmentService
-                                .findByTypeFacilityIDClean(FacilityType.WALL, mst.getWallId(), true);
+                                .findByTypeFacilityIdPartTypeAndClean(FacilityType.WALL, mst.getWallId(), true, PartType.WALL);
                         if(cleanEquipments.size() == 0) {
                             cleanEquipments = facilityEquipmentService
-                                    .findByTypeFacilityIDClean(FacilityType.ROOM, mst.getRoomId(), true);
+                                    .findByTypeFacilityIdPartTypeAndClean(FacilityType.ROOM, mst.getRoomId(), true, PartType.WALL);
                         }
                         if(cleanEquipments.size() == 0) {
                             cleanEquipments = facilityEquipmentService
-                                    .findByTypeFacilityIDClean(FacilityType.FACILITY, mst.getFacilityId(), true);
+                                    .findByTypeFacilityIdPartTypeAndClean(FacilityType.FACILITY, mst.getFacilityId(), true, PartType.WALL);
                         }
                         cleanEquipments.forEach(equipment -> {
                                     resultService.save(new CalculationResult
@@ -177,15 +177,15 @@ public class CalculationService {
                                 });
 
                         List<FacilityEquipment> roughEquipments = facilityEquipmentService
-                                .findByTypeFacilityIDClean(FacilityType.WALL, mst.getWallId(), false);
+                                .findByTypeFacilityIdPartTypeAndClean(FacilityType.WALL, mst.getWallId(), false, PartType.WALL);
                         if(roughEquipments.size() == 0) {
                             roughEquipments = facilityEquipmentService
-                                    .findByTypeFacilityIDClean(FacilityType.ROOM, mst.getRoomId(), false);
+                                    .findByTypeFacilityIdPartTypeAndClean(FacilityType.ROOM, mst.getRoomId(), false, PartType.WALL);
 
                         }
                         if(roughEquipments.size() == 0) {
                             roughEquipments = facilityEquipmentService
-                                    .findByTypeFacilityIDClean(FacilityType.FACILITY, mst.getFacilityId(), false);
+                                    .findByTypeFacilityIdPartTypeAndClean(FacilityType.FACILITY, mst.getFacilityId(), false, PartType.WALL);
 
                         }
                         roughEquipments.forEach(equipment -> {
