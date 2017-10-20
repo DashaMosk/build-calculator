@@ -5,8 +5,10 @@ import com.dreamers.entities.Result;
 import com.dreamers.services.CalculationResultService;
 import com.dreamers.services.CalculationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,6 +24,7 @@ public class CalculationController {
     private CalculationAdapter calculationAdapter;
 
     @GetMapping("/api/calculation")
+    @ResponseStatus(value = HttpStatus.OK)
     public void getCalculation(@RequestParam Long facilityId ) {
         calculationService.doCalculation(facilityId);
     }
